@@ -6,12 +6,12 @@
 import random
 import math
 import cmath
-from PIL import Image
+from PIL import Image, ImageDraw
 import numpy as np
 
 
-xdim = 16
-ydim = 16
+xdim = 2**11
+ydim = xdim
 
 image = Image.new("RGB",(xdim,ydim))
 
@@ -45,10 +45,8 @@ for x in range(xdim):
 			set_size+=1
 		image.putpixel((x,y),(int(256/max_steps*r),0,0))
 
-
-#		image.putpixel((start,i),color)
 #image.save("mandelbrot.png", "PNG")
-image.show()
+#image.show()
 
 
 #for orientation, we are projecting q to the origin. Then, val is actually the determinant of the matrix with column vectors p-q and r-q
@@ -74,14 +72,12 @@ def jarvis(S):
     # P will be the set of points which form the convex hull. Final set size is i.
     pointOnHull = complex(0,ydim/2) # which is guaranteed to be part of the CH(S). This is a well known leftmost point of the Mandelbrot set
     i = 0
-    P = [complex(0,0) for x in range(set_size)]
-    #P = []
+    P = []
     while True:
-        P[i] = pointOnHull
+        P.append(pointOnHull)
         endpoint = S[0]      # initial endpoint for a candidate edge on the hull
         for j in range(set_size):
             # endpoint == pointOnHull is a rare case and can happen only when j == 1 and a better endpoint has not yet been set for the loop
-            #if (endpoint == pointOnHull) or (arg(S[j] - pointOnHull) > arg(endpoint - pointOnHull)):#"S[j] is on left of line from P[i] to endpoint"
             if (endpoint == pointOnHull) or (orientation(S[j], pointOnHull, endpoint) == 1): 
             	endpoint = S[j]   # found greater left turn, update endpoint
         i += 1
@@ -91,20 +87,45 @@ def jarvis(S):
         	print("YES")
         	return P
 
-
-
 #print(set_int)
 print(set_size)
 
 ch = jarvis(set_int)
 cimage = Image.new("RGB",(xdim,ydim))
 
-for k in range(set_size):
-	cimage.putpixel((int(ch[k].real),int(ch[k].imag)),(256,0,0))
-cimage.show()
+for k in range(len(ch)):
+	cimage.putpixel((int(ch[k].real),int(ch[k].imag)),(0,128,0))
+#cimage.show()
+
+#convex_image = Image.new("RGB",(xdim,ydim))
+#draw = ImageDraw.Draw(convex_image)
+draw = ImageDraw.Draw(image)
+
+ch_condensed = ()
+for n in range(len(ch)):
+	ch_condensed += (int(ch[n].real),int(ch[n].imag))
+print(ch_condensed)
+#draw.polygon(ch_condensed,fill=128)
+del draw
+
+#convex_image.show()
+image.show()
 
 
-#111374 points needed
+
+# im = Image.new("RGB",(xdim,ydim))
+
+# draw = ImageDraw.Draw(im)
+# draw.line((0, 0) + im.size, fill=128)
+# print((0,0)+im.size)
+# draw.line((0, im.size[1], im.size[0], 0), fill=128)
+# del draw
+
+# # write to stdout
+# im.show()
+
+
+#111374 points needed for 1024x1024
 
 
 # def complexRecursive(c,z=complex(0,0), iterations = 0):
