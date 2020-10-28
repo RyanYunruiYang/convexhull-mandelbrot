@@ -1,6 +1,7 @@
 #Ryan Yang, 10/26/2020
 #Description
-#Sources:
+
+
 #On my honor, I have neither given nor received personal aid
 
 import random
@@ -9,8 +10,10 @@ import cmath
 from PIL import Image, ImageDraw
 import numpy as np
 
+import time
+start_time = time.time()
 
-xdim = 2**11
+xdim = 2**13
 ydim = xdim
 
 image = Image.new("RGB",(xdim,ydim))
@@ -26,24 +29,26 @@ def get_rounds(c:complex, zinit:complex = 0) -> int:
         i+=1
     return i
 
-xmin = -2
-xmax = 2
-ymin = -2
-ymax = 2
-
-set_int = []
 set_size = 0
-for x in range(xdim):
-	for y in range(ydim):
-		mx = x * (xmax-xmin)/(xdim) + xmin#converting into range from -2 to 2
-		my = y * (ymax-ymin)/(ydim) + ymin#converting into range from -2 to 2
-		r = get_rounds(complex(mx,my)) #i just want to be able to print out the number of iterations needed
-		#r = int(mandelbrot(mx,my,0,0,0))
-		#print(f"x: {mx} y: {my} rounds: {r}")
-		if r >= 25:
-			set_int.append(complex(x,y))
-			set_size+=1
-		image.putpixel((x,y),(int(256/max_steps*r),0,0))
+set_int =[]
+def mandelbrotOriginal():
+	global set_size, set_int
+	xmin = -2
+	xmax = 2
+	ymin = -2
+	ymax = 2
+
+	for x in range(xdim):
+		for y in range(ydim):
+			mx = x * (xmax-xmin)/(xdim) + xmin#converting into range from -2 to 2
+			my = y * (ymax-ymin)/(ydim) + ymin#converting into range from -2 to 2
+			r = get_rounds(complex(mx,my)) #i just want to be able to print out the number of iterations needed
+			#r = int(mandelbrot(mx,my,0,0,0))
+			#print(f"x: {mx} y: {my} rounds: {r}")
+			if r >= 25:
+				set_int.append(complex(x,y))
+				set_size+=1
+			image.putpixel((x,y),(int(256/max_steps*r),0,0))
 
 #image.save("mandelbrot.png", "PNG")
 #image.show()
@@ -82,51 +87,38 @@ def jarvis(S):
             	endpoint = S[j]   # found greater left turn, update endpoint
         i += 1
         pointOnHull = endpoint
-        print(str(i))
+        print("POH: "+str(i))
         if endpoint == P[0]:
-        	print("YES")
+        	print("Exited Jarvis")
         	return P
+def main():
 
-#print(set_int)
-print(set_size)
+	print(f"set_size: {set_size}")
 
-ch = jarvis(set_int)
-cimage = Image.new("RGB",(xdim,ydim))
+	ch = jarvis(set_int)
+	cimage = Image.new("RGB",(xdim,ydim))
 
-for k in range(len(ch)):
-	cimage.putpixel((int(ch[k].real),int(ch[k].imag)),(0,128,0))
-#cimage.show()
+	for k in range(len(ch)):
+		cimage.putpixel((int(ch[k].real),int(ch[k].imag)),(0,128,0))
+	#cimage.show()
 
-#convex_image = Image.new("RGB",(xdim,ydim))
-#draw = ImageDraw.Draw(convex_image)
-draw = ImageDraw.Draw(image)
+	convex_image = Image.new("RGB",(xdim,ydim))
+	draw = ImageDraw.Draw(convex_image)
 
-ch_condensed = ()
-for n in range(len(ch)):
-	ch_condensed += (int(ch[n].real),int(ch[n].imag))
-print(ch_condensed)
-#draw.polygon(ch_condensed,fill=128)
-del draw
+	ch_condensed = ()
+	for n in range(len(ch)):
+		ch_condensed += (int(ch[n].real),int(ch[n].imag))
+	print(f"ch_condensed: {ch_condensed}")
+	draw.polygon(ch_condensed,fill=(0,128,128))
+	del draw
 
-#convex_image.show()
-image.show()
+	final_image = Image.blend(image,convex_image,0.5)
+	final_image.show()
 
-
-
-# im = Image.new("RGB",(xdim,ydim))
-
-# draw = ImageDraw.Draw(im)
-# draw.line((0, 0) + im.size, fill=128)
-# print((0,0)+im.size)
-# draw.line((0, im.size[1], im.size[0], 0), fill=128)
-# del draw
-
-# # write to stdout
-# im.show()
-
-
-#111374 points needed for 1024x1024
-
+mandelbrotOriginal()
+original_time = time.time()
+main()
+print("--- %s sec. for part 1 and %s sec. for part 2 ---" % ((original_time - start_time),(time.time() - original_time)))
 
 # def complexRecursive(c,z=complex(0,0), iterations = 0):
 # 	newz = z*z + c
